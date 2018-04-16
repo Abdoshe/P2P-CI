@@ -5,32 +5,29 @@ import threading
 
 active_peers=[]
 active_RFCs=[]
-hostname="centralServer"
+hostname=''
 port=7734
 
 def main():
     # AF_INET -> ipv4, SOCK_STREAM -> TCP
-    server_socket = socket.socket(AF_INET, SOCK_STREAM)
+    server_socket = socket(AF_INET, SOCK_STREAM)
     try:
-    	server_socket.bind((hostname,port))
+        server_socket.bind((hostname,port))
     except error, msg:
-		print 'Binding to local address unsuccessful. Error Code: ' + str(msg[0]) + ' Message ' + str(msg[1])
-	    sys.exit()
+        print 'Binding to local address unsuccessful. Error Code: ' + str(msg[0]) + ' Message ' + str(msg[1])
+        sys.exit()
     try:
-		while True:
-			server_socket.listen(50)
+        while True:
+            server_socket.listen(50)
             # Accepting connections
-			(conn,socket_info) = server_socket.accept()
+            (conn,socket_info) = server_socket.accept()
             # Spawning thread
-			server_thread = threading.Thread(target = peerThreadHandler, args = (conn))
-		    server_thread.start()
-	except KeyboardInterrupt:
-		server_socket.close()
-		sys.exit(0)
+            server_thread = threading.Thread(target = peerThreadHandler, args = (conn,))
+            server_thread.start()
+    except KeyboardInterrupt:
+        server_socket.close()
+        sys.exit(0)
 
-if __name__ == '__main__':
-    main()    
-    
 class ActivePeer:
     def __init__(self,hostname='None',upload_port='None'):
         self.hostname = hostname
@@ -45,10 +42,10 @@ class ActivePeer:
         return False
     
 class RFC:
-    def __init__(self,rfc_number='None',rfc_title='None'):
+    def __init__(self,rfc_number='None',rfc_title='None', active_peer=ActivePeer()):
         self.rfc_number = rfc_number
         self.rfc_title = rfc_title
-        self.rfc_active_peer = ActivePeer()
+        self.rfc_active_peer = active_peer
     
     def __str__(self):
         return 'RFC '+str(self.rfc_number) +' '+str(self.rfc_title)+' '+str(self.rfc_active_peer.hostname)+' '+str(self.rfc_active_peer.upload_port)
@@ -62,6 +59,7 @@ def peerThreadHandler(peer_socket):
     try:
         while True:
             response = peer_socket.recv(1024)
+            print(response)
             if len(response)==0:
                 peer_socket.close()
                 return
@@ -75,13 +73,13 @@ def peerThreadHandler(peer_socket):
             if action=='ADD':
                 addRFC(response,peer_socket)
             elif action=='LOOKUP':
-                lookUpRFC(response,peer_socket)
+                lookUp(response,peer_socket)
             elif action=='LIST':
-                listRFC(response,peer_socket)
+                list(response,peer_socket)
             elif action=='DEL':
-                deleteRFC(response,peer_socket)
+                deletePeer(response,peer_socket)
     except KeyboardInterrupt:
-        server_socket.close()
+        peer_socket.close()
         sys.exit(0)
         
 def add_padding(msg):
@@ -91,7 +89,7 @@ def add_padding(msg):
         length += 1
     return msg
 
-def addRFC(reponse,peer_socket):
+def addRFC(response,peer_socket):
     arr = response.split(' ');
     rfc_number = arr[2]
     hostname = arr[5]
@@ -102,9 +100,9 @@ def addRFC(reponse,peer_socket):
     peer = ActivePeer(hostname,upload_port)
     if peer not in active_peers:
         active_peers.append(peer)
-    RFC = RFC(rfc_number,title,peer)
-    if RFC not in active_RFCs:
-        active_RFCs.append(RFC)
+    rfc = RFC(rfc_number,title,peer)
+    if rfc not in active_RFCs:
+        active_RFCs.append(rfc)
     msg = 'P2P-CI/1.0 200 OK\n' + 'RFC '+str(rfc_number) + ' ' + str(title) + ' '+str(hostname) + ' ' + str(upload_port)
     msg = add_padding(msg)
     peer_socket.send(msg)
@@ -149,3 +147,6 @@ def deletePeer(response,peer_socket):
     msg = 'P2P-CI/1.0 200 OK \n'
     msg = add_padding(msg)
     peer_socket.send(msg)
+
+if __name__ == '__main__':
+    main()

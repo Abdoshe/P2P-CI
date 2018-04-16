@@ -60,7 +60,7 @@ def peer_server():
 			peer_socket.listen(3)
 			(conn,socket_info) = peer_socket.accept()
 			print '\nConnection initialized on port : ',socket_info[1]
-			peer_thread = threading.Thread(target = peerThreadHandler, args = (conn))
+			peer_thread = threading.Thread(target = peerThreadHandler, args = (conn,))
 			peer_thread.start()
 		peer_socket.close()
 	except KeyboardInterrupt:
@@ -93,7 +93,7 @@ def add_padding(msg):
 	length = len(msg)
 	while length < 1024:
 		msg += '!'
-		length -= 1
+		length += 1
 	return msg
 
 def addRFC(clientsocket,rfc_number=None,rfc_title=None):
@@ -132,7 +132,7 @@ def send_receive(msg,clientsocket):
     i = 0
     for i in xrange(len(response)):
 	    if response[i] == '!':
-            break
+            	break
     response = response[:i]
     print '\nResponse is\n' + str(response)
 
@@ -147,7 +147,9 @@ def menu():
 
 def connect_to_server():
 	global servername
-	servername = raw_input('Enter the server IP: ')
+	serverport = 7734
+	#servername = raw_input('Enter the server IP: ')
+	servername = 'localhost'
 	client_socket = socket(AF_INET, SOCK_STREAM)
 	client_socket.connect((servername,serverport))
 	addRFC(client_socket,123,'A Proferred Official ICP')
@@ -174,7 +176,8 @@ def connect_to_server():
 def main():
 	global upload_port
 	lock = threading.Lock()
-	upload_port = raw_input('Enter the upload port: ')
+	#upload_port = raw_input('Enter the upload port: ')
+	upload_port = 8282
 	try:
 		peer_server_thread = threading.Thread(name = 'Peer_server_thread',target = peer_server)
 		peer_server_thread.setDaemon(True)
