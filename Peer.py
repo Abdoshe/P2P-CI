@@ -131,25 +131,24 @@ def send_receive(msg,clientsocket):
     response = clientsocket.recv(1024)
     i = 0
     for i in xrange(len(response)):
-	    if response[i] == '!':
-            	break
+        if response[i] == '!':
+          	break
     response = response[:i]
     print '\nResponse is\n' + str(response)
 
 def menu():
-	print '************Select option*******************'
-	print '1. Add RFC'
-	print '2. List RFCs'
-	print '3. Lookup RFC'
-	print '4. Download RFC'
-	print '5. Exit( Press Ctrl+Z after getting OK status)'
-        return raw_input('Enter your choice:')
+    print '************Select option*******************'
+    print '1. Add RFC'
+    print '2. List RFCs'
+    print '3. Lookup RFC'
+    print '4. Download RFC'
+    print '5. Exit( Press Ctrl+Z after getting OK status)'
+    return raw_input('Enter your choice:')
 
 def connect_to_server():
 	global servername
 	serverport = 7734
-	#servername = raw_input('Enter the server IP: ')
-	servername = 'localhost'
+	servername = raw_input('Enter the server IP: ')
 	client_socket = socket(AF_INET, SOCK_STREAM)
 	client_socket.connect((servername,serverport))
 	addRFC(client_socket,123,'A Proferred Official ICP')
@@ -175,9 +174,7 @@ def connect_to_server():
 
 def main():
 	global upload_port
-	lock = threading.Lock()
-	#upload_port = raw_input('Enter the upload port: ')
-	upload_port = 8282
+	upload_port = raw_input('Enter the upload port: ')
 	try:
 		peer_server_thread = threading.Thread(name = 'Peer_server_thread',target = peer_server)
 		peer_server_thread.setDaemon(True)
