@@ -92,15 +92,20 @@ def add_padding(msg):
 def addRFC(response,peer_socket):
     arr = response.split(' ');
     rfc_number = arr[2]
-    hostname = arr[5]
-    upload_port = arr[7]
-    title = arr[9:]
+    hostname = arr[3]
+    upload_port = arr[5]
+    upload_port_str=upload_port.split('\n');
+    upload_port=upload_port_str[0];
+    title = arr[6:]
     title = ' '.join(title)
+    #print 'print rfc during add'
+    print arr
     #peer is already in the active peer list?
     peer = ActivePeer(hostname,upload_port)
     if peer not in active_peers:
         active_peers.append(peer)
     rfc = RFC(rfc_number,title,peer)
+    
     if rfc not in active_RFCs:
         active_RFCs.append(rfc)
     msg = 'P2P-CI/1.0 200 OK\n' + 'RFC '+str(rfc_number) + ' ' + str(title) + ' '+str(hostname) + ' ' + str(upload_port)
@@ -142,23 +147,32 @@ def deletePeer(response,peer_socket):
     global active_peers
     global active_RFCs
     copy_active_RFCS=[]
+    hostnameStr=hostname.split('/n');
+    #print 'hostname'+hostnameStr[0]
+    #print 'port'+upload_port
+    print
     for active_RFC in active_RFCs:
-        if active_RFC.rfc_active_peer.hostname == hostname and active_RFC.rfc_active_peer.upload_port== upload_port:
+        #print 'inside hostname: '+active_RFC.rfc_active_peer.hostname
+        #print 'inside port: '+active_RFC.rfc_active_peer.upload_port
+        if active_RFC.rfc_active_peer.hostname == hostnameStr[0] and active_RFC.rfc_active_peer.upload_port== upload_port:
             #active_RFCs.remove(active_RFC)
+            #print 'am i here'
             continue
         else:
             copy_active_RFCS.append(active_RFC)
-    activeRFCs=copy_active_RFCS
+    active_RFCs[:]=copy_active_RFCS
     
     copy_active_peers=[]
     for active_peer in active_peers:
-        if active_peer.hostname == hostname and active_peer.upload_port == upload_port:
+        if active_peer.hostname == hostnameStr[0] and active_peer.upload_port == upload_port:
             #active_peers.remove(active_peer)
             continue
         else:
             copy_active_peers.append(active_peer)
-    active_peers=copy_active_peers
+    active_peers[:]=copy_active_peers
     
+    for i in active_RFCs:
+        print i
     msg = 'P2P-CI/1.0 200 OK \n'
     msg = add_padding(msg)
     peer_socket.send(msg)
