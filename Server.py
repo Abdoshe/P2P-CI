@@ -22,7 +22,7 @@ def main():
             # Accepting connections
             (conn,socket_info) = server_socket.accept()
             # Spawning thread
-            server_thread = threading.Thread(target = peerThreadHandler, args = (conn,))
+            server_thread = threading.Thread(target = peer_thread_factory, args = (conn,))
             server_thread.start()
     except KeyboardInterrupt:
         server_socket.close()
@@ -55,7 +55,7 @@ class RFC:
             return self.rfc_number == other.rfc_number and self.rfc_title == other.rfc_title and self.rfc_active_peer == other.rfc_active_peer
         return False
     
-def peerThreadHandler(peer_socket):
+def peer_thread_factory(peer_socket):
     try:
         while True:
             response = peer_socket.recv(1024)
@@ -71,9 +71,9 @@ def peerThreadHandler(peer_socket):
             arr = response.split(' ');
             action = arr[0]
             if action=='ADD':
-                addRFC(response,peer_socket)
+                add_RFC(response,peer_socket)
             elif action=='LOOKUP':
-                lookUp(response,peer_socket)
+                lookup(response,peer_socket)
             elif action=='LIST':
                 list(peer_socket)
             elif action=='DEL':
@@ -81,7 +81,7 @@ def peerThreadHandler(peer_socket):
     except KeyboardInterrupt:
         peer_socket.close()
         sys.exit(0)
-        
+
 def add_padding(msg):
     length = len(msg)
     while length < 1024:
@@ -89,7 +89,7 @@ def add_padding(msg):
         length += 1
     return msg
 
-def addRFC(response,peer_socket):
+def add_RFC(response,peer_socket):
     arr = response.split(' ');
     rfc_number = arr[2]
     hostname = arr[3]
@@ -98,21 +98,18 @@ def addRFC(response,peer_socket):
     upload_port=upload_port_str[0];
     title = arr[6:]
     title = ' '.join(title)
-    #print 'print rfc during add'
     print arr
-    #peer is already in the active peer list?
     peer = ActivePeer(hostname,upload_port)
     if peer not in active_peers:
         active_peers.append(peer)
     rfc = RFC(rfc_number,title,peer)
-    
     if rfc not in active_RFCs:
         active_RFCs.append(rfc)
     msg = 'P2P-CI/1.0 200 OK\n' + 'RFC '+str(rfc_number) + ' ' + str(title) + ' '+str(hostname) + ' ' + str(upload_port)
     msg = add_padding(msg)
     peer_socket.send(msg)
 
-def lookUp(response,peer_socket):
+def lookup(response,peer_socket):
     arr = response.split(' ');
     rfc_number = arr[2]
     title = arr[9:]
@@ -148,29 +145,20 @@ def deletePeer(response,peer_socket):
     global active_RFCs
     copy_active_RFCS=[]
     hostnameStr=hostname.split('/n');
-    #print 'hostname'+hostnameStr[0]
-    #print 'port'+upload_port
     print
     for active_RFC in active_RFCs:
-        #print 'inside hostname: '+active_RFC.rfc_active_peer.hostname
-        #print 'inside port: '+active_RFC.rfc_active_peer.upload_port
         if active_RFC.rfc_active_peer.hostname == hostnameStr[0] and active_RFC.rfc_active_peer.upload_port== upload_port:
-            #active_RFCs.remove(active_RFC)
-            #print 'am i here'
             continue
         else:
             copy_active_RFCS.append(active_RFC)
     active_RFCs[:]=copy_active_RFCS
-    
     copy_active_peers=[]
     for active_peer in active_peers:
         if active_peer.hostname == hostnameStr[0] and active_peer.upload_port == upload_port:
-            #active_peers.remove(active_peer)
             continue
         else:
             copy_active_peers.append(active_peer)
     active_peers[:]=copy_active_peers
-    
     for i in active_RFCs:
         print i
     msg = 'P2P-CI/1.0 200 OK \n'

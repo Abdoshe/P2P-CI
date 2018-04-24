@@ -65,14 +65,14 @@ def peer_server():
             peer_socket.listen(3)
             (conn,socket_info) = peer_socket.accept()
             print '\nConnection initialized on port : ',socket_info[1]
-            peer_thread = threading.Thread(target = peerThreadHandler, args = (conn,))
+            peer_thread = threading.Thread(target = peer_thread_factory, args = (conn,))
             peer_thread.start()
         peer_socket.close()
     except KeyboardInterrupt:
         peer_socket.close()
         sys.exit(0)
 
-def peerThreadHandler(peer_socket):
+def peer_thread_factory(peer_socket):
     response = peer_socket.recv(1024)
     arr = response.split(' ')
     print arr
@@ -103,7 +103,7 @@ def add_padding(msg):
         length += 1
     return msg
 
-def addRFC(clientsocket,rfc_number=None,rfc_title=None):
+def add_RFC(clientsocket,rfc_number=None,rfc_title=None):
     global hostname
     hostname = gethostname()
     if rfc_title is None:
@@ -112,13 +112,13 @@ def addRFC(clientsocket,rfc_number=None,rfc_title=None):
     msg = 'ADD RFC ' + str(rfc_number) + ' P2P-CI/1.0\nHOST: ' + str(hostname) + '\nPort: ' + str(upload_port) + '\nTitle: ' + str(rfc_title)
     send_receive(msg,clientsocket)
 
-def ListRFC(clientsocket):
+def list_RFC(clientsocket):
     global hostname
     hostname = gethostname()
     msg = 'LIST ALL P2P-CI/1.0\nHOST: ' + str(hostname) + '\nPort: ' + str(upload_port) + '\n'
     send_receive(msg,clientsocket)
 
-def LookupRFC(clientsocket):
+def lookup_RFC(clientsocket):
     global hostname
     hostname = gethostname()
     rfc_number = raw_input('Enter the RFC number: ')
@@ -126,7 +126,7 @@ def LookupRFC(clientsocket):
     msg = 'LOOKUP RFC ' + str(rfc_number) + ' P2P-CI/1.0\nHost: ' + str(hostname) + '\nPort: ' + str(upload_port) + '\nTitle: ' + str(rfc_title)
     send_receive(msg,clientsocket)
 
-def deletePeer(clientsocket):
+def delete_peer(clientsocket):
     global hostname
     hostname = gethostname()
     msg = 'DEL PEER P2P-CI/1.0\nHOST: ' + str(hostname) + '\nPort: ' + str(upload_port)
@@ -158,15 +158,15 @@ def connect_to_server():
     servername = raw_input('Enter the server IP: ')
     client_socket = socket(AF_INET, SOCK_STREAM)
     client_socket.connect((servername,serverport))
-    addRFC(client_socket,123,'A Proferred Official ICP')
+    #addRFC(client_socket,123,'A Proferred Official ICP')
     while True:
         selection = menu()
         if selection == '1':
-            addRFC(client_socket)
+            add_RFC(client_socket)
         elif selection == '2':
-            ListRFC(client_socket)
+            list_RFC(client_socket)
         elif selection == '3':
-            LookupRFC(client_socket)
+            Lookup_RFC(client_socket)
         elif selection == '4':
             peer_name = raw_input('Enter hostname of peer server: ')
             peer_port = raw_input('Enter upload port of peer: ')
@@ -175,7 +175,7 @@ def connect_to_server():
             peer_socket.connect((peer_name,int(peer_port)))
             peer_download(peer_socket,rfc_num,peer_name)
         elif selection == '5':
-            deletePeer(client_socket)
+            delete_peer(client_socket)
             break
         else:
             print 'Invalid Input'
