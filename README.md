@@ -16,12 +16,12 @@ folder and run the centralized server  on some other machine.
 So please have it in your working folder before you start the client code. 
 3) Open the Client terminal using the following command: $python Peer.py 
 Here are a list of options that come up for a Peer. you can run multiple Peers on multiple upload ports.
-'************Select option*******************'
-    print '1. Add RFC'
-    print '2. List RFCs'
-    print '3. Lookup RFC'
-    print '4. Download RFC'
-    print '5. Exit( Press Ctrl+Z after getting OK status)'
+'************Select option*******************'<br>
+    print '1. Add RFC'<br>
+    print '2. List RFCs'<br>
+    print '3. Lookup RFC'<br>
+    print '4. Download RFC'<br>
+    print '5. Exit( Press Ctrl+Z after getting OK status)'<br>
 
 III Steps for Peer-to-Peer Application 
 
