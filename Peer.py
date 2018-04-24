@@ -166,7 +166,7 @@ def connect_to_server():
         elif selection == '2':
             list_RFC(client_socket)
         elif selection == '3':
-            Lookup_RFC(client_socket)
+            lookup_RFC(client_socket)
         elif selection == '4':
             peer_name = raw_input('Enter hostname of peer server: ')
             peer_port = raw_input('Enter upload port of peer: ')
