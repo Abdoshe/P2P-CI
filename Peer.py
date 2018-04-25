@@ -43,7 +43,7 @@ def peer_download(peer_socket,rfc_number,hostname):
     filename="RFC"+rfc_number+".txt"
     f= open(filename,"w+")
     while data:
-        print data
+        #print data
         f.write(data)
         data = peer_socket.recv(1024)
     f.close()
@@ -75,9 +75,9 @@ def peer_server():
 def peer_thread_factory(peer_socket):
     response = peer_socket.recv(1024)
     arr = response.split(' ')
-    print arr
+    #print arr
     filename = 'RFC' + arr[2] + '.txt'
-    print filename
+    #print filename
     cwd = os.getcwd()
     files = os.listdir(cwd)
     if filename in files:

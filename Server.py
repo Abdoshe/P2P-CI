@@ -98,7 +98,7 @@ def add_RFC(response,peer_socket):
     upload_port=upload_port_str[0];
     title = arr[6:]
     title = ' '.join(title)
-    print arr
+    #print arr
     peer = ActivePeer(hostname,upload_port)
     if peer not in active_peers:
         active_peers.append(peer)
@@ -138,14 +138,13 @@ def list(peer_socket):
 
 def deletePeer(response,peer_socket):
     arr = response.split(' ');
-    print arr
+    #print arr
     hostname = arr[2]
     upload_port = arr[4]
     global active_peers
     global active_RFCs
     copy_active_RFCS=[]
     hostnameStr=hostname.split('/n');
-    print
     for active_RFC in active_RFCs:
         if active_RFC.rfc_active_peer.hostname == hostnameStr[0] and active_RFC.rfc_active_peer.upload_port== upload_port:
             continue
@@ -159,8 +158,8 @@ def deletePeer(response,peer_socket):
         else:
             copy_active_peers.append(active_peer)
     active_peers[:]=copy_active_peers
-    for i in active_RFCs:
-        print i
+    #for i in active_RFCs:
+        #print i
     msg = 'P2P-CI/1.0 200 OK \n'
     msg = add_padding(msg)
     peer_socket.send(msg)
